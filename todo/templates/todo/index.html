@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    {% block title %}今日待办{% endblock %}
+{% endblock %}
+
+{% block content %}
+    <table class="index-tb">
+        <tr>
+            <th>待办事项</th>
+            <th>已完成</th>
+            <th>操作</th>
+        </tr>
+        {% for todo in todo_list %}
+            <tr>
+                <td><span class="ellipsis">{{ todo['content'] }}</span></td>
+                <td>
+                    {% if todo['finished'] %}
+                        <span>是</span>
+                    {% else %}
+                        <span>否</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('todo.update', id=todo['id']) }}"><button>修改</button></a>
+                    <a onclick="return confirm('确认删除？');">
+                        <form action="{{ url_for('todo.delete', id=todo['id']) }}" method="post">
+                            <input type="submit" value="删除">
+                        </form>
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}
+        <tr>
+            <td></td>
+            <td></td>
+            <td><a href="{{ url_for('todo.create') }}">
+                <button>新增</button>
+            </a></td>
+        </tr>
+    </table>
+{% endblock %}

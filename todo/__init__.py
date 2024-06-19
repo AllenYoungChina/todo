@@ -40,5 +40,8 @@ def create_app(test_config=None):
     app.register_blueprint(auth.bp)
 
     # 注册待办相关蓝图
+    from . import todo
+    app.register_blueprint(todo.bp)
+    app.add_url_rule('/', endpoint='index')
 
     return app

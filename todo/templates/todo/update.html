@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    {% block title %}修改待办{% endblock %}
+{% endblock %}
+
+{% block content %}
+    <form action="" method="post">
+        <table>
+            <tr>
+                <td><label for="content">待办事项：</label></td>
+                <td>
+                    <input type="text" name="content" id="content" required
+                    value="{{ request.form['content'] or todo['content'] }}">
+                </td>
+            </tr>
+            <tr>
+                <td><label>是否完成：</label></td>
+                <td>
+                    <label for="done">已完成</label>
+                    <input type="radio" name="finished" id="done" value="1">
+                    <label for="ongoing">未完成</label>
+                    <input type="radio" name="finished" id="ongoing" value="0">
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="submit" value="提交"></td>
+            </tr>
+        </table>
+    </form>
+{% endblock %}
+
+{% block script %}
+    <script>
+        var selectedValue = {{ todo.finished }};
+        selectedValue = selectedValue.toString()
+
+        // 查询所有name属性为myRadio的input元素
+        var radios = document.querySelectorAll('input[name="finished"]');
+
+        // 遍历这些元素，并设置checked属性
+        radios.forEach(function(radio) {
+            console.log(radio.value, typeof radio.value)
+            if (radio.value === selectedValue) {
+                radio.checked = true;
+            }
+        })
+    </script>
+{% endblock %}
