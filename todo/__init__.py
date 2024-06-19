@@ -36,6 +36,8 @@ def create_app(test_config=None):
     db.init_app(app)
 
     # 注册认证相关蓝图
+    from . import auth
+    app.register_blueprint(auth.bp)
 
     # 注册待办相关蓝图
 
