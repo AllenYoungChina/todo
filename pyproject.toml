@@ -1,0 +1,11 @@
+[project]
+name = 'todo'
+version = '1.0.0'
+description = '基于Flask编写的待办事项应用。'
+dependencies = [
+    'flask',
+]
+
+[build-system]
+requires = ["flit_core<4"]
+build-backend = "flit_core.buildapi"
