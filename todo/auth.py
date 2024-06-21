@@ -10,23 +10,27 @@ from todo.db import get_db
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 
+def check_auth_input(username, password):
+    error = None
+    if not username:
+        error = '请输入用户名'
+    elif len(username) > 10 or len(username) < 3:
+        error = '用户名应为3-10个字符'
+
+    if not password:
+        error = '请输入密码'
+    elif len(password) > 18 or len(password) < 6:
+        error = '密码应为6-18个字符'
+
+    return error
+
+
 @bp.route('/register', methods=('GET', 'POST'))
 def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        error = None
-        print(username, password)
-
-        if not username:
-            error = '请输入用户名'
-        elif len(username) > 10 or len(username) < 3:
-            error = '用户名应为3-10个字符'
-
-        if not password:
-            error = '请输入密码'
-        elif len(password) > 18 or len(password) < 6:
-            error = '密码应为6-18个字符'
+        error = check_auth_input(username, password)
 
         if error is None:
             db = get_db()
@@ -52,18 +56,19 @@ def login():
         username = request.form['username']
         password = request.form['password']
         db = get_db()
-        error = None
-
-        user = db.execute(
-            'SELECT * FROM user WHERE username = ?', (username,)
-        ).fetchone()
-        if not user or not check_password_hash(user['password'], password):
-            error = '用户名或密码错误'
+        error = check_auth_input(username, password)
 
         if error is None:
-            session.clear()
-            session['user_id'] = user['id']
-            return redirect(url_for('index'))
+            user = db.execute(
+                'SELECT * FROM user WHERE username = ?', (username,)
+            ).fetchone()
+            if not user or not check_password_hash(user['password'], password):
+                error = '用户名或密码错误'
+
+            if error is None:
+                session.clear()
+                session['user_id'] = user['id']
+                return redirect(url_for('index'))
 
         flash(error)
 
