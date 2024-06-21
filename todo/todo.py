@@ -51,7 +51,7 @@ def create():
     return render_template('todo/create.html')
 
 
-def get_todo(id, check_user=True):
+def get_todo(id):
     """获取指定ID的待办事项"""
     todo = get_db().execute(
         'SELECT * FROM todo WHERE id = ?', (id,)
@@ -60,9 +60,8 @@ def get_todo(id, check_user=True):
     if todo is None:
         abort(404, f'id为{id}的待办不存在')
 
-    if check_user:
-        if todo['user_id'] != g.user['id']:
-            abort(403)
+    if todo['user_id'] != g.user['id']:
+        abort(403)
 
     return todo
 

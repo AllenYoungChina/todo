@@ -45,10 +45,11 @@ def test_login(client, auth):
 
 
 @pytest.mark.parametrize(('username', 'password', 'message'), (
+    ('', '123456', '请输入用户名'),
     ('hell_', '123456', '用户名或密码错误'),
     ('hello', '1234567', '用户名或密码错误')
 ))
-def login_validate_input(auth, username, password, message):
+def test_login_validate_input(auth, username, password, message):
     """测试登录功能"""
     response = auth.login(username=username, password=password)
     assert message in response.get_data(as_text=True)
