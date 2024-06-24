@@ -72,6 +72,7 @@
     display: inline-block;
 }
 .ellipsis {
+    line-height: 20px;
     display: inline-block;
     width: 400px;
     white-space: nowrap;
