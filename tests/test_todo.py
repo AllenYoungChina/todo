@@ -1,3 +1,5 @@
+import datetime
+
 import pytest
 from flask import g
 
@@ -51,15 +53,16 @@ def test_index(app, client, auth):
     assert 'test' in data
     assert '退出' in data
 
-    # 用户可正常查看今天创建的待办事项
+    # 用户可正常查看今日待办和昨日待办
     assert 'today' in data
+    assert 'yesterday' in data
     # 用户可以看到待办事项的操作按钮
     assert '/update/1' in data
     assert '/delete/1' in data
 
-    # 用户无法查看不是今天创建的待办事项
+    # 用户仅能查看今日待办和昨日待办
     assert 'tomorrow' not in data
-    assert 'yesterday' not in data
+    assert 'before yesterday' not in data
 
     with app.app_context():
         db = get_db()
@@ -72,8 +75,8 @@ def test_index(app, client, auth):
 
 
 @pytest.mark.parametrize('path', (
-    '/update/4',
-    '/delete/4'
+    '/update/5',
+    '/delete/5'
 ))
 def test_exists_required(client, auth, path):
     """测试待办事项存在性校验"""
@@ -88,8 +91,13 @@ def test_create(app, auth, client):
 
     client.post('/create', data=dict(content='created', finished=0))
     with app.app_context():
-        count = get_db().execute('SELECT COUNT(id) FROM todo').fetchone()[0]
-        assert count == 4
+        db = get_db()
+        count = db.execute('SELECT COUNT(id) FROM todo').fetchone()[0]
+        assert count == 5
+        todo_create = db.execute(
+            'SELECT * FROM todo WHERE id = ?', (4,)
+        ).fetchone()
+        assert todo_create['user_id'] == 1
 
 
 def test_update(app, auth, client):
@@ -124,3 +132,16 @@ def test_delete(app, auth, client):
     with app.app_context():
         todo = get_db().execute('SELECT * FROM todo WHERE id = 1').fetchone()
         assert todo is None
+
+
+def test_add(app, auth, client):
+    """测试添加历史待办事项到今日待办"""
+    auth.login()
+    response = client.post('/add/2')
+    assert response.headers['Location'] == '/'
+    with app.app_context():
+        todo_add = get_db().execute(
+            'SELECT * FROM todo WHERE id = ?', (5,)
+        ).fetchone()
+        assert todo_add['content'] == 'yesterday'
+        assert todo_add['created'].date() == datetime.date.today()

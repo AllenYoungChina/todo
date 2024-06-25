@@ -7,4 +7,5 @@ INSERT INTO todo (user_id, content, finished, created)
 VALUES
     (1, 'today', 1, CURRENT_TIMESTAMP),
     (1, 'yesterday', 0, DATETIME('now', '-1 day')),
+    (1, 'before yesterday', 0, DATETIME('now', '-2 day')),
     (1, 'tomorrow', 0, DATETIME('now', '+1 day'));

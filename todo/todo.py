@@ -102,3 +102,16 @@ def delete(id):
     )
     db.commit()
     return redirect(url_for('index'))
+
+
+@bp.route('/add/<int:id>', methods=('POST',))
+@login_required
+def add(id):
+    todo = get_todo(id)
+    db = get_db()
+    db.execute(
+        'INSERT INTO todo (content, finished, user_id) VALUES (?, ?, ?)',
+        (todo['content'], todo['finished'], g.user['id'])
+    )
+    db.commit()
+    return redirect(url_for('index'))
