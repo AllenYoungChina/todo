@@ -15,7 +15,7 @@ bp = Blueprint('todo', __name__)
 @login_required
 def index():
     db = get_db()
-    todo_list = db.execute(
+    todo_today = db.execute(
         'SELECT t.id, t.content, t.finished FROM todo t'
         ' JOIN user u ON t.user_id = u.id'
         ' WHERE u.id = ? AND DATE(t.created) = ?'
@@ -23,7 +23,18 @@ def index():
         (g.user['id'], datetime.now().date())
     ).fetchall()
 
-    return render_template('todo/index.html', todo_list=todo_list)
+    yesterday = datetime.now().date() - timedelta(days=1)
+    todo_yesterday = db.execute(
+        'SELECT t.id, t.content, t.finished FROM todo t'
+        ' JOIN user u ON t.user_id = u.id'
+        ' WHERE u.id = ? AND DATE(t.created) = ?'
+        ' ORDER BY t.created DESC',
+        (g.user['id'], yesterday)
+    ).fetchall()
+
+    return render_template(
+        'todo/index.html', todo_today=todo_today, todo_yesterday=todo_yesterday
+    )
 
 
 @bp.route('/create', methods=['GET', 'POST'])
