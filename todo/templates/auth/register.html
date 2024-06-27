@@ -1,25 +1,60 @@
 {% extends 'base.html' %}
 
-
-{% block header %}
-    {% block title %}注册{% endblock %}
+{% block title %}
+登录
 {% endblock %}
 
 {% block content %}
-    <form action="" method="post">
-        <table>
-            <tr>
-                <td><label for="username">用户名：</label></td>
-                <td><input type="text" name="username" id="username" required></td>
-            </tr>
-            <tr>
-                <td><label for="password">密码：</label></td>
-                <td><input type="password" name="password" id="password" required></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td><input type="submit" value="注册"></td>
-            </tr>
-        </table>
-    </form>
+<div class="row justify-content-center">
+    <div class="col-sm-6">
+        <div>
+            <h2>注册</h2>
+        </div>
+        <form action="{{ url_for('auth.register') }}" method="post">
+            <div class="row mb-3">
+                <label for="username" class="col-sm-2 col-form-label">用户名：</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="username" name="username" required>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="password" class="col-sm-2 col-form-label">密码：</label>
+                <div class="col-sm-10">
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="confirmPassword" class="col-sm-2 col-form-label">确认密码：</label>
+                <div class="col-sm-10">
+                    <input type="password" class="form-control" id="confirmPassword" name="confirm_password" required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-2">
+                    <button type="submit" class="btn btn-primary">注册</button>
+                </div>
+                {% for message in get_flashed_messages() %}
+                <div class="flash col-sm-10 align-content-center text-danger">{{ message }}</div>
+                {% endfor %}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let password = document.getElementById('password');
+        let confirmPassword = document.getElementById('confirmPassword');
+
+        confirmPassword.addEventListener('input', function () {
+            if (password.value !== confirmPassword.value) {
+                confirmPassword.setCustomValidity('两次输入的密码不一致');
+            } else {
+                confirmPassword.setCustomValidity('')
+            }
+        });
+    });
+</script>
 {% endblock %}

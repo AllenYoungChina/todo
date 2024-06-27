@@ -1,76 +1,102 @@
 {% extends 'base.html' %}
 
-{% block header %}
-    {% block title %}今日待办{% endblock %}
+{% block title %}
+待办事项
 {% endblock %}
 
 {% block content %}
-    <table class="index-tb">
-        <tr>
-            <th>待办事项</th>
-            <th>已完成</th>
-            <th>操作</th>
-        </tr>
-        {% for todo in todo_today %}
+<div class="row justify-content-center">
+    <div class="col-sm-8">
+        <div>
+            <h2>今日待办</h2>
+        </div>
+        <table class="table table-hover">
+            <thead>
             <tr>
-                <td><span class="ellipsis">{{ todo['content'] }}</span></td>
-                <td>
+                <th scope="col" class="col-sm-8">待办事项</th>
+                <th scope="col" class="text-center col-sm-2">已完成</th>
+                <th scope="col" class="text-center col-sm-2">操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for todo in todo_today %}
+            <tr>
+                <td class="align-content-center">
+                    {{ todo['content'] }}
+                </td>
+                <td class="text-center align-content-center">
                     {% if todo['finished'] %}
-                        <span>是</span>
+                    <span>是</span>
                     {% else %}
-                        <span>否</span>
+                    <span>否</span>
                     {% endif %}
                 </td>
-                <td>
-                    <a href="{{ url_for('todo.update', id=todo['id']) }}"><button>修改</button></a>
-                    <a onclick="return confirm('确认删除？');">
-                        <form action="{{ url_for('todo.delete', id=todo['id']) }}" method="post">
-                            <input type="submit" value="删除">
-                        </form>
-                    </a>
+                <td class="align-content-center">
+                    <div class="d-flex justify-content-around">
+                        <a href="{{ url_for('todo.update', id=todo['id']) }}">
+                            <button class="btn btn-sm btn-primary">修改</button>
+                        </a>
+                        <a onclick="return confirm('确认删除？');">
+                            <form action="{{ url_for('todo.delete', id=todo['id']) }}" method="post">
+                                <input class="btn btn-sm btn-danger" type="submit" value="删除">
+                            </form>
+                        </a>
+                    </div>
                 </td>
             </tr>
-        {% endfor %}
-        <tr>
-            <td></td>
-            <td></td>
-            <td><a href="{{ url_for('todo.create') }}">
-                <button>新增</button>
-            </a></td>
-        </tr>
-    </table>
-
-    <hr>
-    <div class="header">昨日待办</div>
-    <table class="index-tb">
-        <tr>
-            <th>待办事项</th>
-            <th>已完成</th>
-            <th>操作</th>
-        </tr>
-        {% for todo in todo_yesterday %}
+            {% endfor %}
+            </tbody>
+        </table>
+        <div class="col-sm-2 offset-10 d-flex justify-content-center">
+            <a href="{{ url_for('todo.create') }}">
+                <button class="btn btn-sm btn-primary">新增待办</button>
+            </a>
+        </div>
+    </div>
+</div>
+<div class="row justify-content-center">
+    <div class="col-sm-8">
+        <div>
+            <h2>昨日待办</h2>
+        </div>
+        <table class="table table-hover">
+            <thead>
             <tr>
-                <td><span class="ellipsis">{{ todo['content'] }}</span></td>
-                <td>
+                <th scope="col" class="col-sm-8">待办事项</th>
+                <th scope="col" class="text-center col-sm-2">已完成</th>
+                <th scope="col" class="text-center col-sm-2">操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for todo in todo_yesterday %}
+            <tr>
+                <td class="align-content-center">
+                    {{ todo['content'] }}
+                </td>
+                <td class="text-center align-content-center">
                     {% if todo['finished'] %}
-                        <span>是</span>
+                    <span>是</span>
                     {% else %}
-                        <span>否</span>
+                    <span>否</span>
                     {% endif %}
                 </td>
-                <td>
-                    <a onclick="return confirm('确认添加到今日待办？');">
+                <td class="align-content-center">
+                    <div class="d-flex justify-content-around">
                         <form action="{{ url_for('todo.add', id=todo['id']) }}" method="post">
-                            <input type="submit" value="添加">
+                            <button class="btn btn-sm btn-primary" type="submit"
+                                    onclick="return confirm('确认添加到今日待办？');">添加
+                            </button>
                         </form>
-                    </a>
-                    <a onclick="return confirm('确认删除？');">
                         <form action="{{ url_for('todo.delete', id=todo['id']) }}" method="post">
-                            <input type="submit" value="删除">
+                            <input class="btn btn-sm btn-danger" type="submit" value="删除"
+                                   onclick="return confirm('确认删除？');">
                         </form>
-                    </a>
+                    </div>
                 </td>
             </tr>
-        {% endfor %}
-    </table>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}
