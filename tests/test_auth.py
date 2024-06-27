@@ -8,7 +8,7 @@ def test_register(client, app):
     """测试用户注册功能"""
     response = client.get('/auth/register')
     assert response.status_code == 200
-    response = client.post('/auth/register', data=dict(username='hello', password='123456'))
+    response = client.post('/auth/register', data=dict(username='hello', password='123456', confirm_password='123456'))
     assert response.headers['Location'] == '/auth/login'
 
     with app.app_context():
@@ -17,18 +17,20 @@ def test_register(client, app):
         ).fetchone() is not None
 
 
-@pytest.mark.parametrize(('username', 'password', 'message'), (
-    ('', '123456', '请输入用户名'),
-    ('12', '123456', '用户名应为3-10个字符'),
-    ('12345678901', '123456', '用户名应为3-10个字符'),
-    ('hello', '', '请输入密码'),
-    ('hello', '12345', '密码应为6-18个字符'),
-    ('hello', '1234567890123456789', '密码应为6-18个字符'),
-    ('test', '123456', '已被注册'),
+@pytest.mark.parametrize(('username', 'password', 'confirm_password', 'message'), (
+    ('', '123456', '123456', '请输入用户名'),
+    ('12', '123456', '123456', '用户名应为3-10个字符'),
+    ('12345678901', '123456', '123456', '用户名应为3-10个字符'),
+    ('hello', '', '', '请输入密码'),
+    ('hello', '12345', '12345', '密码应为6-18个字符'),
+    ('hello', '1234567890123456789', '1234567890123456789', '密码应为6-18个字符'),
+    ('hello', '123456', '123123', '两次输入密码不一致'),
+    ('test', '123456', '123456', '已被注册'),
 ))
-def test_register_validate_input(client, username, password, message):
+def test_register_validate_input(client, username, password, confirm_password, message):
     """测试用户注册功能的参数校验"""
-    response = client.post('/auth/register', data=dict(username=username, password=password))
+    response = client.post('/auth/register',
+                           data=dict(username=username, password=password, confirm_password=confirm_password))
     assert message in response.get_data(as_text=True)
 
 

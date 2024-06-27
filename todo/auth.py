@@ -30,7 +30,11 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        confirm_password = request.form['confirm_password']
         error = check_auth_input(username, password)
+
+        if confirm_password != password:
+            error = '两次输入密码不一致'
 
         if error is None:
             db = get_db()
