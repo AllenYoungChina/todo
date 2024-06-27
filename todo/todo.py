@@ -37,7 +37,7 @@ def index():
     )
 
 
-@bp.route('/create', methods=['GET', 'POST'])
+@bp.route('/create', methods=('GET', 'POST'))
 @login_required
 def create():
     if request.method == 'POST':
@@ -47,6 +47,8 @@ def create():
 
         if not content:
             error = '请输入待办事项'
+        elif len(content) > 32:
+            error = '待办事项最多输入32个字符'
 
         if error is None:
             db = get_db()
@@ -89,6 +91,8 @@ def update(id):
 
         if not content:
             error = '请输入待办事项'
+        elif len(content) > 32:
+            error = '待办事项最多输入32个字符'
 
         if error is None:
             db = get_db()

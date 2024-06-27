@@ -121,6 +121,9 @@ def test_create_update_validate(auth, client, path):
     auth.login()
     data = client.post(path, data=dict(content='', finished=0)).get_data(as_text=True)
     assert '请输入待办事项' in data
+    content = '12345678' * 4 + '0'
+    data = client.post(path, data=dict(content=content, finished=0)).get_data(as_text=True)
+    assert '待办事项最多输入32个字符' in data
 
 
 def test_delete(app, auth, client):
