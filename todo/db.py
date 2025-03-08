@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime, date
 
 import click
 
@@ -38,6 +39,25 @@ def init_db_command():
     init_db()
     click.echo('数据库初始化已完成。')
 
+
+# 自定义适配器和转换器
+def adapt_datetime(val):
+    return val.isoformat()
+
+def adapt_date(val):
+    return val.isoformat()
+
+def convert_datetime(val):
+    return datetime.fromisoformat(val.decode())
+
+def convert_date(val):
+    return date.fromisoformat(val.decode())
+
+# 注册适配器和转换器
+sqlite3.register_adapter(datetime, adapt_datetime)
+sqlite3.register_adapter(date, adapt_date)
+sqlite3.register_converter("TIMESTAMP", convert_datetime)
+sqlite3.register_converter("DATE", convert_date)
 
 def init_app(app):
     """用于将数据库相关操作注册到应用上"""
