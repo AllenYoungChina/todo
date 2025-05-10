@@ -4,6 +4,10 @@
 修改待办
 {% endblock %}
 
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='flatpickr-4.6.13/css/flatpickr.min.css') }}">
+{% endblock %}
+
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-sm-6">
@@ -29,6 +33,13 @@
                     </div>
                 </div>
             </div>
+            <div class="row mb-3">
+                <label for="datePicker" class="col-sm-3 col-form-label">日期：</label>
+                <div class="col-sm-9">
+                    <input type="text" class="form-control" id="datePicker" name="schedule" placeholder="选择待办日期"
+                    value="{{ ((request.form['schedule'] or todo['schedule']) | fmt_datetime('%Y-%m-%d')) or '' }}">
+                </div>
+            </div>
             <div class="row">
                 <div class="col-sm-3">
                     <button type="submit" class="btn btn-primary">修改</button>
@@ -43,6 +54,7 @@
 {% endblock %}
 
 {% block script %}
+    {# 根据修改前的“已完成”的状态做默认勾选 #}
     <script>
         var selectedValue = {{ todo.finished }};
         selectedValue = selectedValue.toString()
@@ -58,4 +70,18 @@
             }
         })
     </script>
+
+    {# 引入日期插件flatpickr并做本地化处理 #}
+    <script src="{{ url_for('static', filename='flatpickr-4.6.13/js/flatpickr.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='flatpickr-4.6.13/js/l10n/zh.min.js') }}"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        flatpickr("#datePicker", {
+            dateFormat: "Y-m-d",
+            enableTime: false,
+            allowInput: true,
+            locale: "zh",
+        });
+    });
+</script>
 {% endblock %}

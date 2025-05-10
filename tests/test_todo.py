@@ -53,16 +53,14 @@ def test_index(app, client, auth):
     assert 'test' in data
     assert '退出' in data
 
-    # 用户可正常查看今日待办和昨日待办
+    # 用户可正常查看今日待办
     assert 'today' in data
-    assert 'yesterday' in data
     # 用户可以看到待办事项的操作按钮
     assert '/update/1' in data
     assert '/delete/1' in data
 
     # 用户仅能查看今日待办和昨日待办
     assert 'tomorrow' not in data
-    assert 'before yesterday' not in data
 
     with app.app_context():
         db = get_db()

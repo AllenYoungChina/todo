@@ -1,25 +1,36 @@
 {% extends 'base.html' %}
 
 {% block title %}
-待办事项
+待办池
 {% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-sm-8">
+        <div>
+            <h2>待办池</h2>
+        </div>
         <table class="table table-hover">
             <thead>
             <tr>
-                <th scope="col" class="col-sm-8">待办事项</th>
+                <th scope="col" class="col-sm-6">待办事项</th>
+                <th scope="col" class="text-center col-sm-2">日期</th>
                 <th scope="col" class="text-center col-sm-2">已完成</th>
                 <th scope="col" class="text-center col-sm-2">操作</th>
             </tr>
             </thead>
             <tbody>
-            {% for todo in todo_today %}
+            {% for todo in todo_list %}
             <tr>
                 <td class="align-content-center">
                     {{ todo['content'] }}
+                </td>
+                <td class="text-center">
+                    {% if todo['schedule'] %}
+                        {{ todo['schedule'] | fmt_datetime('%Y-%m-%d') }}
+                    {% else %}
+                        <span>未指定</span>
+                    {% endif %}
                 </td>
                 <td class="text-center align-content-center">
                     {% if todo['finished'] %}
@@ -30,11 +41,11 @@
                 </td>
                 <td class="align-content-center">
                     <div class="d-flex justify-content-around">
-                        <a href="{{ url_for('todo.update', id_=todo['id']) }}">
+                        <a href="{{ url_for('todo.update', id_=todo['id'], from='list') }}">
                             <button class="btn btn-sm btn-primary">修改</button>
                         </a>
                         <a onclick="return confirm('确认删除？');">
-                            <form action="{{ url_for('todo.delete', id_=todo['id']) }}" method="post">
+                            <form action="{{ url_for('todo.delete', id_=todo['id'], from='list')}}" method="post">
                                 <input class="btn btn-sm btn-danger" type="submit" value="删除">
                             </form>
                         </a>
@@ -45,7 +56,7 @@
             </tbody>
         </table>
         <div class="col-sm-2 offset-10 d-flex justify-content-center">
-            <a href="{{ url_for('todo.create') }}">
+            <a href="{{ url_for('todo.create', from='list') }}">
                 <button class="btn btn-sm btn-primary">新增</button>
             </a>
         </div>

@@ -18,23 +18,26 @@ def index():
     todo_today = db.execute(
         'SELECT t.id, t.content, t.finished FROM todo t'
         ' JOIN user u ON t.user_id = u.id'
-        ' WHERE u.id = ? AND DATE(t.created) = ?'
+        ' WHERE u.id = ? AND DATE(t.schedule) = ?'
         ' ORDER BY t.created DESC',
         (g.user['id'], datetime.now().date())
     ).fetchall()
 
-    yesterday = datetime.now().date() - timedelta(days=1)
-    todo_yesterday = db.execute(
-        'SELECT t.id, t.content, t.finished FROM todo t'
-        ' JOIN user u ON t.user_id = u.id'
-        ' WHERE u.id = ? AND DATE(t.created) = ?'
-        ' ORDER BY t.created DESC',
-        (g.user['id'], yesterday)
-    ).fetchall()
+    return render_template('todo/index.html', todo_today=todo_today)
 
-    return render_template(
-        'todo/index.html', todo_today=todo_today, todo_yesterday=todo_yesterday
-    )
+
+@bp.route('/list')
+@login_required
+def list_():
+    td = datetime.today().date()
+    # 仅显示今天以后（不含今天）的未完成待办事项
+    todo_list = get_db().execute(
+        "SELECT * FROM todo WHERE user_id = ?"
+        " AND finished = 0"
+        " AND(schedule is NULL OR DATE(schedule) > ?)",
+        (g.user['id'], td)
+    ).fetchall()
+    return render_template("/todo/list.html", todo_list=todo_list)
 
 
 @bp.route('/create', methods=('GET', 'POST'))
@@ -43,35 +46,49 @@ def create():
     if request.method == 'POST':
         content = request.form['content']
         finished = request.form['finished']
-        error = None
+        # 未指定日期（传递空字符串）时，数据库存NULL
+        schedule = request.form['schedule'] or None
+        from_ = request.args.get('from')
+        errors = list()
+
+        print(schedule, type(schedule))
 
         if not content:
-            error = '请输入待办事项'
+            errors.append('请输入待办事项')
         elif len(content) > 32:
-            error = '待办事项最多输入32个字符'
+            errors.append('待办事项最多输入32个字符')
 
-        if error is None:
+        if schedule:
+            try:
+                schedule = datetime.strptime(schedule, '%Y-%m-%d')
+            except ValueError:
+                errors.append('日期格式有误')
+
+        if not errors:
             db = get_db()
             db.execute(
-                'INSERT INTO todo (content, finished, user_id) VALUES (?, ?, ?)',
-                (content, finished, g.user['id'])
+                'INSERT INTO todo (content, finished, schedule, user_id) VALUES (?, ?, ?, ?)',
+                (content, finished, schedule, g.user['id'])
             )
             db.commit()
+
+            if from_ == 'list':
+                return redirect(url_for('todo.list_'))
             return redirect(url_for('index'))
 
-        flash(error)
+        flash(errors[0])
 
     return render_template('todo/create.html')
 
 
-def get_todo(id):
+def get_todo(id_):
     """获取指定ID的待办事项"""
     todo = get_db().execute(
-        'SELECT * FROM todo WHERE id = ?', (id,)
+        'SELECT * FROM todo WHERE id = ?', (id_,)
     ).fetchone()
 
     if todo is None:
-        abort(404, f'id为{id}的待办不存在')
+        abort(404, f'id为{id_}的待办不存在')
 
     if todo['user_id'] != g.user['id']:
         abort(403)
@@ -79,54 +96,56 @@ def get_todo(id):
     return todo
 
 
-@bp.route('/update/<int:id>', methods=('GET', 'POST'))
+@bp.route('/update/<int:id_>', methods=('GET', 'POST'))
 @login_required
-def update(id):
-    todo = get_todo(id)
+def update(id_):
+    todo = get_todo(id_)
 
     if request.method == 'POST':
         content = request.form['content']
         finished = request.form['finished']
-        error = None
+        schedule = request.form['schedule'] or None
+        from_ = request.args.get('from')
+        errors = list()
 
         if not content:
-            error = '请输入待办事项'
+            errors.append('请输入待办事项')
         elif len(content) > 32:
-            error = '待办事项最多输入32个字符'
+            errors.append('待办事项最多输入32个字符')
 
-        if error is None:
+        if schedule:
+            try:
+                schedule = datetime.strptime(schedule, '%Y-%m-%d')
+            except ValueError:
+                errors.append('日期格式有误')
+
+        if not errors:
             db = get_db()
             db.execute(
-                'UPDATE todo SET content = ?, finished = ? WHERE id = ?',
-                (content, finished, id)
+                'UPDATE todo SET content = ?, finished = ?, schedule = ? WHERE id = ?',
+                (content, finished, schedule, id_)
             )
             db.commit()
+
+            if from_ == 'list':
+                return redirect(url_for('todo.list_'))
             return redirect(url_for('index'))
 
-        flash(error)
+        flash(errors[0])
     return render_template('todo/update.html', todo=todo)
 
 
-@bp.route('/delete/<int:id>', methods=('POST',))
+@bp.route('/delete/<int:id_>', methods=('POST',))
 @login_required
-def delete(id):
-    todo = get_todo(id)
+def delete(id_):
+    todo = get_todo(id_)
+    from_ = request.args.get('from')
     db = get_db()
     db.execute(
-        'DELETE FROM todo WHERE id = ?', (id,)
+        'DELETE FROM todo WHERE id = ?', (id_,)
     )
     db.commit()
-    return redirect(url_for('index'))
 
-
-@bp.route('/add/<int:id>', methods=('POST',))
-@login_required
-def add(id):
-    todo = get_todo(id)
-    db = get_db()
-    db.execute(
-        'INSERT INTO todo (content, finished, user_id) VALUES (?, ?, ?)',
-        (todo['content'], todo['finished'], g.user['id'])
-    )
-    db.commit()
+    if from_ == 'list':
+        return redirect(url_for('todo.list_'))
     return redirect(url_for('index'))

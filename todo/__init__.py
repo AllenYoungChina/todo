@@ -44,4 +44,8 @@ def create_app(test_config=None):
     app.register_blueprint(todo.bp)
     app.add_url_rule('/', endpoint='index')
 
+    # 注册自定义过滤器
+    from . import filters
+    filters.init_app(app)
+
     return app
